@@ -1,0 +1,16 @@
+train: data/frames/images
+val: data/frames/images
+nc: 12
+names: 
+  0: person
+  1: face
+  2: hand_gesture
+  3: text_overlay
+  4: product
+  5: background
+  6: transition_effect
+  7: emotion_happy
+  8: emotion_surprised
+  9: dance_move
+  10: props
+  11: phone_screen
