@@ -1,0 +1,326 @@
+/* src/App.css */
+
+/* Base styles - TikTok Dark Theme */
+.screen {
+    width: 100%;
+    min-height: 100vh;
+    background-color: #121212;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    padding: 16px;
+}
+.phone-container {
+    width: 100%;
+    max-width: 400px; /* Max width for phone-like appearance */
+    height: 95vh; /* Use viewport height */
+    max-height: 812px; /* But don't let it get too tall */
+    background: #000;
+    border-radius: 40px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    display: flex; /* Use flexbox for layout */
+    flex-direction: column; /* Stack header and content vertically */
+    overflow: hidden; /* Hide anything that spills out */
+}
+
+.app-header {
+    padding: 40px 20px 20px 20px;
+    text-align: center;
+    background: linear-gradient(135deg, #25f4ee, #fe2c55);
+    flex-shrink: 0; /* Header should not shrink */
+}
+
+.app-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #FFFFFF;
+}
+
+.app-subtitle {
+    font-size: 14px;
+    color: #FFFFFF;
+    margin-top: 4px;
+    opacity: 0.9;
+}
+
+/* --- CHANGED: Ensured content area fills space and scrolls --- */
+.content {
+    flex-grow: 1; /* Allow content to fill remaining space */
+    width: 100%;
+    padding: 20px;
+    overflow-y: auto; /* Enable vertical scrolling ONLY when needed */
+    background-color: #121212;
+}
+
+/* Upload Section */
+.upload-section {
+    padding-top: 40px;
+}
+
+.upload-btn {
+    width: 100%;
+    height: 150px;
+    border: 2px dashed #444444;
+    border-radius: 16px;
+    background-color: #1e1e1e;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: border-color 0.3s;
+}
+.upload-btn:hover {
+    border-color: #fe2c55;
+}
+
+.upload-icon {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 12px;
+}
+
+.upload-text-main {
+    font-size: 16px;
+    color: #FFFFFF;
+    font-weight: 500;
+}
+
+.upload-text-sub {
+    font-size: 12px;
+    color: #888888;
+    margin-top: 6px;
+}
+
+/* Buttons */
+.analyze-btn {
+    width: 100%;
+    height: 50px;
+    background-image: linear-gradient(135deg, #25f4ee, #fe2c55); /* TikTok gradient */
+    color: white;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    margin-top: 20px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.analyze-btn:disabled {
+    background-image: none;
+    background-color: #333333;
+    color: #888888;
+    cursor: not-allowed;
+}
+
+/* Loading Section */
+.loading-section {
+    padding-top: 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #444;
+    border-top-color: #fe2c55;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.loading-title {
+    color: #FFFFFF;
+    font-size: 18px;
+    margin-top: 20px;
+    font-weight: 600;
+}
+
+.loading-subtitle {
+    color: #AAAAAA;
+    font-size: 14px;
+    margin-top: 8px;
+    margin-bottom: 20px; /* Add space before the log */
+}
+
+.agent-log {
+    margin-top: 30px;
+    width: 100%;
+}
+
+.log-item {
+    color: #555;
+    font-size: 14px;
+    margin-top: 12px;
+    opacity: 0; /* Start hidden */
+    transition: color 0.5s, opacity 0.5s;
+    transform: translateY(10px); /* Start slightly lower */
+    transition-property: color, opacity, transform;
+    transition-duration: 0.4s;
+}
+.log-item.active {
+    color: #E0E0E0;
+    opacity: 1; /* Fade in */
+    transform: translateY(0); /* Move up to position */
+}
+
+/* Results Section */
+.results-section {
+    display: flex;
+    flex-direction: column;
+    gap: 25px; /* Add consistent spacing between all cards */
+}
+
+/* --- NEW: Animation keyframes and classes --- */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-1 { animation: fadeIn 0.5s ease-out forwards; }
+.animate-fade-in-2 { animation: fadeIn 0.5s 0.2s ease-out forwards; opacity: 0; }
+.animate-fade-in-3 { animation: fadeIn 0.5s 0.4s ease-out forwards; opacity: 0; }
+.animate-fade-in-4 { animation: fadeIn 0.5s 0.6s ease-out forwards; opacity: 0; }
+.animate-fade-in-5 { animation: fadeIn 0.5s 0.8s ease-out forwards; opacity: 0; }
+
+
+.overall-score-card {
+    background-color: #1e1e1e;
+    padding: 25px;
+    border-radius: 20px;
+    text-align: center;
+}
+
+.overall-score-value {
+    font-size: 52px;
+    font-weight: 700;
+    color: #FFFFFF;
+}
+
+.overall-score-label {
+    color: #AAAAAA;
+    font-size: 14px;
+    margin-top: 4px;
+}
+
+.tier-badge {
+    background-image: linear-gradient(135deg, #25f4ee, #fe2c55);
+    padding: 5px 15px;
+    border-radius: 20px;
+    margin-top: 15px;
+    display: inline-block;
+}
+
+.tier-text {
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.metric-card {
+    background-color: #1e1e1e;
+    padding: 20px;
+    border-radius: 16px;
+    text-align: center;
+}
+
+.metric-name {
+    font-size: 12px;
+    color: #AAAAAA;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.metric-value {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.recommendations-card, .earnings-card {
+    background-color: #1e1e1e;
+    padding: 20px;
+    border-radius: 16px;
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.card-title {
+    font-size: 16px;
+    color: #E0E0E0;
+    font-weight: 600;
+}
+
+.rec-item {
+    background-color: #2a2a2a;
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    border-left: 3px solid #25f4ee;
+}
+.rec-text {
+    font-size: 14px;
+    color: #DDDDDD;
+    line-height: 1.4;
+}
+
+.earnings-amount {
+    font-size: 32px;
+    font-weight: 700;
+    color: #FFFFFF;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.earnings-breakdown {
+    font-size: 12px;
+    color: #AAAAAA;
+    text-align: center;
+}
+
+.rec-feedback {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+    opacity: 0.7;
+}
+.feedback-prompt {
+    font-size: 12px;
+    color: #999;
+    margin-right: 10px;
+}
+.feedback-icon {
+    font-size: 16px;
+    cursor: pointer;
+    margin: 0 5px;
+    transition: transform 0.2s;
+}
+.feedback-icon:hover {
+    transform: scale(1.2);
+}
+
+.earnings-amount, .earnings-breakdown {
+    text-align: center;
+}
+
+.analyze-btn {
+    margin-bottom: 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

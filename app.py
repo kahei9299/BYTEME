@@ -1,18 +1,23 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 from demo_analyzer import InstantTikTokAnalyzer
 from pathlib import Path
+import logging
+
+# Setup logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 # ---------------- Placeholder classes ----------------
 class RewardCalculator:
     def calculate_reward(self, metrics):
-        # Example calculation
+        # Your existing reward calculation code
         overall = metrics.get("overall", 0)
-        tier = "Bronze"
+        tier = "bronze"
         if overall >= 0.75:
-            tier = "Gold"
-        elif overall >= 0.5:
-            tier = "Silver"
+            tier = "gold"
+        elif overall >= 0.6:
+            tier = "silver"
         return {
             "amount": int(overall * 1000),
             "breakdown": f"Base: {int(overall*500)} • Tier Bonus: +{int(overall*500)}",
@@ -24,68 +29,115 @@ def generate_advice(metrics):
     for metric, value in metrics.items():
         if metric == "overall":
             continue
-        if value < 0.5:
-            recs.append(f"Improve your {metric} for better performance")
+        if value < 6.0:
+            recs.append(f"Improve your {metric} for better performance (current: {value:.1f}/10.0)")
         else:
-            recs.append(f"{metric.capitalize()} looks good!")
+            recs.append(f"{metric.capitalize()} looks good! ({value:.1f}/10.0)")
     return recs
 
 # ---------------- Flask app ----------------
 app = Flask(__name__)
-CORS(app)
 
+# CORS configuration - CRITICAL for Lynx frontend
+CORS(app, resources={
+    r"/*": {
+        "origins": ["http://localhost:3000", "http://localhost:8000", "http://127.0.0.1:3000", "http://127.0.0.1:8000"],
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"],
+        "supports_credentials": True
+    }
+})
+
+# Replace with a simple API status endpoint
 @app.route("/")
 def index():
-    # Serve the front-end HTML
-    return send_from_directory('.', 'index.html')
+    return jsonify({
+        "status": "success",
+        "message": "TikTok Analyzer API is running",
+        "endpoints": {
+            "analyze_video": "POST /analyze-video"
+        }
+    })
 
-@app.route("/analyze-video", methods=["POST"])
+@app.route("/analyze-video", methods=["POST", "OPTIONS"])
 def analyze_video():
+    if request.method == "OPTIONS":
+        return _build_cors_preflight_response()
+    
+    logger.debug("Analyze video endpoint called")
+    
     if "video" not in request.files:
+        logger.warning("No video file in request")
         return jsonify({"error": "No video file provided"}), 400
 
     video_file = request.files["video"]
+    logger.debug(f"Received file: {video_file.filename}")
 
     # Save video temporarily
     upload_dir = Path("uploads")
     upload_dir.mkdir(exist_ok=True)
     filepath = upload_dir / video_file.filename
-    video_file.save(filepath)
+    
+    try:
+        video_file.save(filepath)
+    except Exception as e:
+        logger.error(f"Error saving file: {str(e)}")
+        return jsonify({"error": f"Error saving file: {str(e)}"}), 500
 
     try:
         # Analyze video using YOLO analyzer
         analyzer = InstantTikTokAnalyzer()
-        results = analyzer.analyze_video(str(filepath))  # Should return dict with metrics
+        results = analyzer.analyze_video(str(filepath))
 
         metrics = results.get("metrics", {})
+        logger.debug(f"Analysis results: {metrics}")
 
-        # Ensure 'overall' exists
-        if "overall" not in metrics:
-            if len(metrics) > 0:
-                metrics["overall"] = sum(metrics.values()) / len(metrics)
-            else:
-                metrics["overall"] = 0.0
+        # Transform metrics to frontend format (0-10 scale)
+        transformed_metrics = {
+            "accuracy": metrics.get("accuracy", 0.5) * 10,
+            "plot_homogeneity": metrics.get("plot_homogeneity", 0.5) * 10,
+            "comedic_value": metrics.get("comedic_value", 0.5) * 10,
+            "theatrism": metrics.get("theatrism", 0.5) * 10,
+            "plot_coherence": metrics.get("plot_coherence", 0.5) * 10,
+            "overall": metrics.get("overall_score", 0.5) * 10
+        }
 
         # Calculate rewards
         calculator = RewardCalculator()
-        rewards = calculator.calculate_reward(metrics)
+        rewards = calculator.calculate_reward(transformed_metrics)
 
         # Generate recommendations
-        recommendations = generate_advice(metrics)
+        recommendations = generate_advice(transformed_metrics)
 
-        return jsonify({
-            "scores": metrics,
+        response_data = {
+            "scores": transformed_metrics,
             "recommendations": recommendations,
             "earnings": rewards,
             "tier": rewards["tier"]
-        })
+        }
+        
+        logger.debug(f"Sending response: {response_data}")
+        return jsonify(response_data)
 
     except Exception as e:
+        logger.error(f"Analysis error: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
     finally:
-        if filepath.exists():
-            filepath.unlink()  # Delete temporary file
+        # Clean up temporary file
+        try:
+            if filepath.exists():
+                filepath.unlink()
+        except Exception as e:
+            logger.warning(f"Error deleting temp file: {str(e)}")
+
+def _build_cors_preflight_response():
+    response = jsonify({"status": "OK"})
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add("Access-Control-Allow-Headers", "Content-Type")
+    response.headers.add("Access-Control-Allow-Methods", "POST, OPTIONS")
+    return response
 
 if __name__ == "__main__":
-    app.run(port=5000, debug=True)
+    logger.info("Starting Flask API server...")
+    app.run(port=5000, debug=True, host='0.0.0.0')
