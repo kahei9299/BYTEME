@@ -248,36 +248,31 @@ def analyze_video():
     """API endpoint to analyze TikTok video"""
     try:
         data = request.get_json()
-        url = data.get('url', '').strip()
+        url = data.get('url', '').strip() # We still receive the URL, but won't use it for download
         description = data.get('description', '').strip()
         
-        if not url:
-            return jsonify({'error': 'URL is required'}), 400
         
-        if 'tiktok.com' not in url or '/video/' not in url:
-            return jsonify({'error': 'Invalid TikTok URL'}), 400
+        # Instead of downloading, we point directly to a local file.
+        video_path = os.path.join(os.path.dirname(__file__), 'local_video.MP4')
         
-        # Create temporary directory for video
-        temp_dir = tempfile.mkdtemp()
-        
-        try:
-            # Download video
-            video_path = download_tiktok_video(url, temp_dir)
+        if not os.path.exists(video_path):
+            return jsonify({'error': 'Local video file not found on server.'}), 500
             
-            # Analyze with AI
-            scores = analyze_video_with_ai(video_path, description)
             
-            # Calculate average score
-            average_score = sum(scores) / len(scores)
+        # Analyze with AI
+        scores = analyze_video_with_ai(video_path, description)
             
-            # Get reward tier
-            tier = get_reward_tier(average_score)
+        # Calculate average score
+        average_score = sum(scores) / len(scores)
             
-            # Generate advice
-            advice = get_improvement_advice(scores)
+        # Get reward tier
+        tier = get_reward_tier(average_score)
             
-            # Prepare response - convert numpy types to Python types
-            result = {
+         # Generate advice
+        advice = get_improvement_advice(scores)
+            
+        # Prepare response - convert numpy types to Python types
+        result = {
                 'url': url,
                 'description': description or 'TikTok video analysis',
                 'scores': {
@@ -292,13 +287,8 @@ def analyze_video():
                 'advice': advice
             }
             
-            return jsonify(result)
+        return jsonify(result)
             
-        finally:
-            # Clean up temporary files
-            if os.path.exists(temp_dir):
-                shutil.rmtree(temp_dir)
-                
     except Exception as e:
         print(f"Analysis error: {e}")
         return jsonify({'error': str(e)}), 500
