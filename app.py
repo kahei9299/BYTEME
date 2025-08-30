@@ -48,6 +48,7 @@ CORS(app, resources={
     }
 })
 
+
 # Replace with a simple API status endpoint
 @app.route("/")
 def index():

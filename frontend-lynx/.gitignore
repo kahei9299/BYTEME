@@ -9,7 +9,7 @@ __pycache__/
 *.sqlite3
 *.egg-info/
 
-# Jupyter & cache
+# Jupyter & caches
 .ipynb_checkpoints/
 .pytest_cache/
 .mypy_cache/
