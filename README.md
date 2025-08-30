@@ -30,8 +30,6 @@ BYTEME is an AI-powered web application that analyzes TikTok videos to extract f
    npm install
    ```
 
-   *(Repeat for backend if applicable)*
-
 ### Running the Application
 
 In the backend folder, the target video to be analysed must be at /backend/local_video.MP4.
